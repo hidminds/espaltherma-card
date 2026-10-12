@@ -2,7 +2,7 @@
 // ESPAltherma web page, fed by the entities ESPAltherma publishes through MQTT discovery.
 //   card:      type: custom:espaltherma-card   (options: climate, entities: {key: entity_id})
 //   dashboard: strategy: {type: custom:espaltherma}   (options: climate)
-const VERSION = "1.0.2";
+const VERSION = "1.0.3";
 
 // Entities, by the ids ESPAltherma's discovery gives them (built from the English labels, the same everywhere)
 const FIND = {
@@ -19,15 +19,21 @@ const FIND = {
   // two-zone units: the mixed zone's temperature after its valve, its pump, the direct zone's pump and target
   mixed: /^sensor\.espaltherma_mixed_water_temp/, mainPump: /^binary_sensor\.espaltherma_main_pump$/,
   addPump: /^binary_sensor\.espaltherma_add_pump$/, lwSpAdd: /^sensor\.espaltherma_lw_setpoint_add/,
+  // the hot water target, when the unit allows setting it (experimental option of ESPAltherma)
+  dhwSet: /^number\.(espaltherma_)?hot_water_target$/,
 };
 
 const I18N = /*I18N*/{};
 // Texts of the dashboard that the web page does not have
 const OWN = {
-  fr: {"Mode": "Mode", "Error": "Erreur", "Current": "Courant"},
-  de: {"Mode": "Betriebsart", "Error": "Fehler", "Current": "Strom"},
-  it: {"Mode": "Modalità", "Error": "Errore", "Current": "Corrente"},
-  es: {"Mode": "Modo", "Error": "Error", "Current": "Corriente"},
+  fr: {"Mode": "Mode", "Error": "Erreur", "Current": "Courant",
+    "Lower the hot water target": "Baisser la consigne d'eau chaude", "Raise the hot water target": "Monter la consigne d'eau chaude"},
+  de: {"Mode": "Betriebsart", "Error": "Fehler", "Current": "Strom",
+    "Lower the hot water target": "Warmwasser-Sollwert senken", "Raise the hot water target": "Warmwasser-Sollwert anheben"},
+  it: {"Mode": "Modalità", "Error": "Errore", "Current": "Corrente",
+    "Lower the hot water target": "Abbassare la temperatura desiderata dell'acqua calda", "Raise the hot water target": "Alzare la temperatura desiderata dell'acqua calda"},
+  es: {"Mode": "Modo", "Error": "Error", "Current": "Corriente",
+    "Lower the hot water target": "Bajar la consigna de agua caliente", "Raise the hot water target": "Subir la consigna de agua caliente"},
 };
 
 // Shrinks an SVG text to max units wide (translations can be longer than the English the drawing was made for)
@@ -85,7 +91,9 @@ svg.bizone #pSpace,svg.bizone #pSpace+.fl,svg.bizone #bSpace{display:none}
 .ln{fill:none;stroke:var(--ea-ink2);stroke-width:1.5}
 .area{fill:var(--ea-soft);stroke:none}
 .tag rect{fill:var(--ea-card);stroke:var(--ea-line);stroke-width:1.2}
-.tag,.click{cursor:pointer}
+.tag,.click,.btn{cursor:pointer}
+#gDhwSet{display:none}svg.cansetdhw #gDhwSet{display:block}
+.btn circle{transition:fill .15s}.btn:hover circle{fill:var(--ea-soft)}.btn:active circle{fill:var(--ea-line)}
 .tl{font:600 12px var(--paper-font-body1_-_font-family,sans-serif);fill:var(--ea-ink2)}
 .tv{font:600 18px var(--paper-font-body1_-_font-family,sans-serif);fill:var(--ea-ink)}
 .tb{font:600 38px var(--paper-font-body1_-_font-family,sans-serif);fill:var(--ea-ink)}
@@ -155,6 +163,10 @@ const SVG = `<svg viewBox="0 0 800 560" role="img">
 <g class="click" data-key="tank"><text class="tl" x="665" y="104" text-anchor="middle" data-t="Hot water"></text>
 <text class="tb" x="665" y="148" text-anchor="middle" id="sTank"></text>
 <text class="ts" x="665" y="172" text-anchor="middle" id="sDhwSp"></text></g>
+<g id="gDhwSet"><g class="btn" data-act="-"><title data-t="Lower the hot water target"></title>
+<circle class="eq" cx="609" cy="167" r="13"/><path class="ln" d="M602 167h14"/></g>
+<g class="btn" data-act="+"><title data-t="Raise the hot water target"></title>
+<circle class="eq" cx="721" cy="167" r="13"/><path class="ln" d="M714 167h14M721 160v14"/></g></g>
 <g class="click" data-key="room"><text class="tl" x="685" y="390" text-anchor="middle" data-t="Living room"></text>
 <text class="tb" x="685" y="432" text-anchor="middle" id="sRoom"></text>
 <text class="ts" x="685" y="456" text-anchor="middle" id="sRtSp"></text></g>
@@ -180,14 +192,37 @@ class EspalthermaCard extends HTMLElement {
     const q = s => this._root.querySelector(s);
     q("#tags").innerHTML = TAGS.map(g => `<g class="tag" data-key="${g[1]}" transform="translate(${g[2]},${g[3]})"><rect width="${g[4]}" height="46" rx="14"/><text class="tl" x="12" y="18" style="font-size:11.5px" data-t="${g[0]}"></text><text class="tv" x="12" y="38" id="g_${g[1]}"></text></g>`).join("");
     this._root.querySelectorAll(".pipe").forEach(p => { const c = p.cloneNode(); c.removeAttribute("id"); c.setAttribute("class", "fl"); p.after(c); });
-    // A tap on a reading opens its history
+    // A tap on a reading opens its history; the hot water buttons change the target
     this._root.addEventListener("click", ev => {
-      const g = ev.composedPath().find(n => n.dataset && n.dataset.key);
+      const path = ev.composedPath();
+      const b = path.find(n => n.dataset && n.dataset.act);
+      if (b) { this._setDhw(b.dataset.act === "+" ? 1 : -1); return; }
+      const g = path.find(n => n.dataset && n.dataset.key);
       if (!g) return;
       const k = g.dataset.key;
       const id = (k === "room" && this._climate) ? this._climate : this._ent && this._ent[k];
       if (id) this.dispatchEvent(new CustomEvent("hass-more-info", {bubbles: true, composed: true, detail: {entityId: id}}));
     });
+  }
+
+  // One step warmer or colder. The heat pump takes a few seconds to confirm, so the asked value is shown
+  // meanwhile, and another tap starts from it.
+  _setDhw(dir) {
+    const hass = this._hass, id = this._ent && this._ent.dhwSet, s = id && hass.states[id];
+    if (!s) return;
+    const a = s.attributes, step = parseFloat(a.step) || 1;
+    const from = this._asked != null ? this._asked : parseFloat(s.state);
+    if (isNaN(from)) return;
+    let v = from + dir * step;
+    if (a.min != null) v = Math.max(parseFloat(a.min), v);
+    if (a.max != null) v = Math.min(parseFloat(a.max), v);
+    if (v === from) return;
+    this._asked = v;
+    this._askedAt = Date.now();
+    hass.callService("number", "set_value", {entity_id: id, value: v});
+    this._paint();
+    clearTimeout(this._askedTimer);
+    this._askedTimer = setTimeout(() => this._paint(), 31000); // drops the asked value if nothing comes back
   }
 
   _paint() {
@@ -237,7 +272,14 @@ class EspalthermaCard extends HTMLElement {
     tx("sRoom", deg(room));
     const target_ = v => tr(hass, "target {n}°", {n: Math.round(v * 10) / 10});
     tx("sRtSp", target != null ? target_(target) : clim && clim.state === "off" ? (hass.formatEntityState ? hass.formatEntityState(clim) : "off") : "");
-    tx("sDhwSp", n("dhwSp") != null ? target_(n("dhwSp")) : "");
+    // Hot water target: the entity that sets it when there is one, otherwise the reading. The buttons appear
+    // only when the heat pump accepts a target (ESPAltherma's experimental option).
+    const set = st("dhwSet"), setV = set ? parseFloat(set.state) : NaN;
+    q("svg").classList.toggle("cansetdhw", !!set && !isNaN(setV));
+    if (this._asked != null && (setV === this._asked || Date.now() - this._askedAt > 30000)) this._asked = null;
+    const dhwSp = this._asked != null ? this._asked : !isNaN(setV) ? setV : n("dhwSp");
+    tx("sDhwSp", dhwSp != null && !isNaN(dhwSp) ? target_(dhwSp) : "");
+    if (set) requestAnimationFrame(() => fit(q("#sDhwSp"), 76)); // keeps the text between the two buttons
     // The leaving water target: with two zones, the direct one's (the mixed zone has its own, shown at the valve)
     const lwSpK = two && n("lwSpAdd") != null ? "lwSpAdd" : "lwSp";
     tx("sLwSp", n(lwSpK) != null ? target_(n(lwSpK)) : "");
@@ -261,6 +303,10 @@ class EspalthermaStrategy {
       lw1: tr(hass, "Heat pump out"), inlet: tr(hass, "Return"), amp: tr(hass, "Current"), mixed: tr(hass, "Mixed water")};
     const tiles = ["out", "tank", "inv", "flow", "bar", "mode", "err"].filter(has)
       .map(k => ({type: "tile", entity: ent[k], name: name[k], grid_options: {columns: 6}}));
+    // The hot water target, with its own buttons, when the heat pump accepts one
+    if (has("dhwSet"))
+      tiles.unshift({type: "tile", entity: ent.dhwSet, name: tr(hass, "Hot water target"),
+        features: [{type: "numeric-input", style: "buttons"}], grid_options: {columns: 12}});
     const line = k => ({entity: ent[k], name: name[k]});
     const water = ["lw2", "lw1", "mixed", "inlet", "tank", "out"].filter(has).map(line);
     const sections = [
