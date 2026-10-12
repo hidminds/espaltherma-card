@@ -20,7 +20,7 @@ const FIND = {
   mixed: /^sensor\.espaltherma_mixed_water_temp/, mainPump: /^binary_sensor\.espaltherma_main_pump$/,
   addPump: /^binary_sensor\.espaltherma_add_pump$/, lwSpAdd: /^sensor\.espaltherma_lw_setpoint_add/,
   // the hot water target, when the unit allows setting it (experimental option of ESPAltherma)
-  dhwSet: /^number\.(espaltherma_)?hot_water_target$/,
+  dhwSet: /^number\.[a-z0-9_]*hot_water_target$/,
 };
 
 const I18N = /*I18N*/{};
