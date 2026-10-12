@@ -7,7 +7,8 @@ The live drawing of your heat pump installation from the [ESPAltherma](https://g
 - **The drawing:**
   - the outdoor unit, the backup heater, the hot water tank and the house;
   - water pipes coloured by temperature, from blue (15°) to red (55°);
-  - the fan spinning while the compressor runs, the 3-way valve's position and the water flow.
+  - the fan spinning while the compressor runs, the 3-way valve's position and the water flow;
+  - **Two zones:** on a bi-zone unit, once the mixed water temperature is among the values ESPAltherma reads, the house gets a direct zone (radiators) and a mixed zone (the floor loop) with its valve, each with its pump and its target.
 - **Taps:** tap a reading to open its history.
 - **Room temperature:** the living room shows your thermostat's temperature and target when you have one (a `climate` entity).
 - **Languages:** English, French, German, Italian and Spanish, following your Home Assistant language. It uses your theme's colours, light or dark.
@@ -77,6 +78,10 @@ Keys of `entities`:
 | `rtSp` | room setpoint |
 | `dhwSp` | hot water setpoint |
 | `lwSp` | leaving water setpoint |
+| `lwSpAdd` | leaving water setpoint of the additional (direct) zone |
+| `mixed` | mixed water temperature (R7T), after the mixing valve |
+| `mainPump` | pump of the main (mixed) zone |
+| `addPump` | pump of the additional (direct) zone |
 | `inv` | compressor frequency |
 | `amp` | compressor current |
 | `v3` | 3-way valve |

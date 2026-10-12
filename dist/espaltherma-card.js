@@ -2,7 +2,7 @@
 // ESPAltherma web page, fed by the entities ESPAltherma publishes through MQTT discovery.
 //   card:      type: custom:espaltherma-card   (options: climate, entities: {key: entity_id})
 //   dashboard: strategy: {type: custom:espaltherma}   (options: climate)
-const VERSION = "1.0.1";
+const VERSION = "1.0.2";
 
 // Entities, by the ids ESPAltherma's discovery gives them (built from the English labels, the same everywhere)
 const FIND = {
@@ -16,9 +16,12 @@ const FIND = {
   flow: /^sensor\.espaltherma_flow_sensor/, bar: /^sensor\.espaltherma_water_pressure$/,
   mode: /^sensor\.espaltherma_operation_mode$/, err: /^sensor\.espaltherma_error_type$/,
   defrost: /^binary_sensor\.espaltherma_defrost_operation$/,
+  // two-zone units: the mixed zone's temperature after its valve, its pump, the direct zone's pump and target
+  mixed: /^sensor\.espaltherma_mixed_water_temp/, mainPump: /^binary_sensor\.espaltherma_main_pump$/,
+  addPump: /^binary_sensor\.espaltherma_add_pump$/, lwSpAdd: /^sensor\.espaltherma_lw_setpoint_add/,
 };
 
-const I18N = {"fr":{"3-way valve":"Vanne 3 voies","Backup heater":"Appoint électrique","Compressor":"Compresseur","Flow":"Débit","Heat exchanger":"Échangeur","Heat pump out":"Sortie PAC","Hot water":"Eau chaude","Indoor unit":"Unité intérieure","Leaving":"Départ","Living room":"Séjour","Outdoor unit":"Unité extérieure","Outside":"Extérieur","Pump off":"Pompe arrêtée","Pump on":"Pompe en marche","Refrigerant":"Réfrigérant","Resting":"Au repos","Return":"Retour","Water pressure":"Pression d'eau","Water temperature":"Température de l'eau","target {n}°":"consigne {n}°","to the hot water":"vers l'eau chaude","to the house":"vers la maison"},"de":{"3-way valve":"3-Wege-Ventil","Backup heater":"Heizstab","Compressor":"Verdichter","Flow":"Durchfluss","Heat exchanger":"Wärmetauscher","Heat pump out":"WP-Austritt","Hot water":"Warmwasser","Indoor unit":"Innengerät","Leaving":"Vorlauf","Living room":"Wohnzimmer","Outdoor unit":"Außengerät","Outside":"Außen","Pump off":"Pumpe aus","Pump on":"Pumpe an","Refrigerant":"Kältemittel","Resting":"In Ruhe","Return":"Rücklauf","Water pressure":"Wasserdruck","Water temperature":"Wassertemperatur","target {n}°":"Soll {n}°","to the hot water":"zum Warmwasser","to the house":"zum Haus"},"it":{"3-way valve":"Valvola a 3 vie","Backup heater":"Resistenza elettrica","Compressor":"Compressore","Flow":"Portata","Heat exchanger":"Scambiatore","Heat pump out":"Uscita PdC","Hot water":"Acqua calda","Indoor unit":"Unità interna","Leaving":"Mandata","Living room":"Soggiorno","Outdoor unit":"Unità esterna","Outside":"Esterno","Pump off":"Pompa spenta","Pump on":"Pompa accesa","Refrigerant":"Refrigerante","Resting":"A riposo","Return":"Ritorno","Water pressure":"Pressione dell'acqua","Water temperature":"Temperatura dell'acqua","target {n}°":"obiettivo {n}°","to the hot water":"verso l'acqua calda","to the house":"verso la casa"},"es":{"3-way valve":"Válvula de 3 vías","Backup heater":"Resistencia de apoyo","Compressor":"Compresor","Flow":"Caudal","Heat exchanger":"Intercambiador","Heat pump out":"Salida BdC","Hot water":"Agua caliente","Indoor unit":"Unidad interior","Leaving":"Impulsión","Living room":"Salón","Outdoor unit":"Unidad exterior","Outside":"Exterior","Pump off":"Bomba parada","Pump on":"Bomba en marcha","Refrigerant":"Refrigerante","Resting":"En reposo","Return":"Retorno","Water pressure":"Presión del agua","Water temperature":"Temperatura del agua","target {n}°":"consigna {n}°","to the hot water":"hacia el agua caliente","to the house":"hacia la casa"}};
+const I18N = {"fr":{"3-way valve":"Vanne 3 voies","Backup heater":"Appoint électrique","Compressor":"Compresseur","Flow":"Débit","Heat exchanger":"Échangeur","Heat pump out":"Sortie PAC","Hot water":"Eau chaude","Indoor unit":"Unité intérieure","Leaving":"Départ","Living room":"Séjour","Mixed water":"Eau mélangée","Outdoor unit":"Unité extérieure","Outside":"Extérieur","Pump off":"Pompe arrêtée","Pump on":"Pompe en marche","Refrigerant":"Réfrigérant","Resting":"Au repos","Return":"Retour","Water pressure":"Pression d'eau","Water temperature":"Température de l'eau","target {n}°":"consigne {n}°","to the hot water":"vers l'eau chaude","to the house":"vers la maison"},"de":{"3-way valve":"3-Wege-Ventil","Backup heater":"Heizstab","Compressor":"Verdichter","Flow":"Durchfluss","Heat exchanger":"Wärmetauscher","Heat pump out":"WP-Austritt","Hot water":"Warmwasser","Indoor unit":"Innengerät","Leaving":"Vorlauf","Living room":"Wohnzimmer","Mixed water":"Mischwasser","Outdoor unit":"Außengerät","Outside":"Außen","Pump off":"Pumpe aus","Pump on":"Pumpe an","Refrigerant":"Kältemittel","Resting":"In Ruhe","Return":"Rücklauf","Water pressure":"Wasserdruck","Water temperature":"Wassertemperatur","target {n}°":"Soll {n}°","to the hot water":"zum Warmwasser","to the house":"zum Haus"},"it":{"3-way valve":"Valvola a 3 vie","Backup heater":"Resistenza elettrica","Compressor":"Compressore","Flow":"Portata","Heat exchanger":"Scambiatore","Heat pump out":"Uscita PdC","Hot water":"Acqua calda","Indoor unit":"Unità interna","Leaving":"Mandata","Living room":"Soggiorno","Mixed water":"Acqua miscelata","Outdoor unit":"Unità esterna","Outside":"Esterno","Pump off":"Pompa spenta","Pump on":"Pompa accesa","Refrigerant":"Refrigerante","Resting":"A riposo","Return":"Ritorno","Water pressure":"Pressione dell'acqua","Water temperature":"Temperatura dell'acqua","target {n}°":"obiettivo {n}°","to the hot water":"verso l'acqua calda","to the house":"verso la casa"},"es":{"3-way valve":"Válvula de 3 vías","Backup heater":"Resistencia de apoyo","Compressor":"Compresor","Flow":"Caudal","Heat exchanger":"Intercambiador","Heat pump out":"Salida BdC","Hot water":"Agua caliente","Indoor unit":"Unidad interior","Leaving":"Impulsión","Living room":"Salón","Mixed water":"Agua mezclada","Outdoor unit":"Unidad exterior","Outside":"Exterior","Pump off":"Bomba parada","Pump on":"Bomba en marcha","Refrigerant":"Refrigerante","Resting":"En reposo","Return":"Retorno","Water pressure":"Presión del agua","Water temperature":"Temperatura del agua","target {n}°":"consigna {n}°","to the hot water":"hacia el agua caliente","to the house":"hacia la casa"}};
 // Texts of the dashboard that the web page does not have
 const OWN = {
   fr: {"Mode": "Mode", "Error": "Erreur", "Current": "Courant"},
@@ -75,6 +78,9 @@ svg{display:block;width:100%;height:auto;min-width:480px}
 .flowing .act .fl{opacity:.95;animation:fl .9s linear infinite}
 @keyframes fl{to{stroke-dashoffset:-18}}
 .br{transition:opacity .6s}.br:not(.act){opacity:.28}
+#gZones,.bz{display:none}svg.bizone #gZones,svg.bizone .bz{display:block}
+svg.bizone #pSpace,svg.bizone #pSpace+.fl,svg.bizone #bSpace{display:none}
+#gZones .zoff{opacity:.3}#gZones .zoff .fl{animation:none;opacity:0}
 .eq{fill:var(--ea-card);stroke:var(--ea-ink2);stroke-width:1.6}
 .ln{fill:none;stroke:var(--ea-ink2);stroke-width:1.5}
 .area{fill:var(--ea-soft);stroke:none}
@@ -122,8 +128,20 @@ const SVG = `<svg viewBox="0 0 800 560" role="img">
 <g id="gDhw" class="br"><path class="pipe" id="pDhw" d="M494 90H598"/>
 <path class="pipe" id="pCoil" style="stroke-width:4.5" d="M598 90l40 10-36 14 36 14-36 14 36 14-36 14 36 14-36 14 36 14-36 14-12 4"/>
 <path class="pipe" id="pDhwR" d="M590 232H555V525"/></g>
-<path d="M547 400H563" style="stroke:var(--ea-card);stroke-width:14"/>
-<g id="gSp" class="br act"><path class="pipe" id="pSpace" d="M482 102V400H600V485"/><path class="pipe" id="pLoop" style="stroke-width:4.5" d="M600 485H770V498H612V511H770V525H580"/></g>
+<path id="bSpace" d="M547 400H563" style="stroke:var(--ea-card);stroke-width:14"/>
+<path class="bz" d="M547 368H563M547 446H563" style="stroke:var(--ea-card);stroke-width:14"/>
+<g id="gSp" class="br act"><path class="pipe" id="pSpace" d="M482 102V400H600V485"/><path class="pipe" id="pLoop" style="stroke-width:4.5" d="M600 485H770V498H612V511H770V525H580"/>
+<g id="gZones"><path class="pipe" id="pTrunk" d="M482 102V409"/>
+<g id="gDirect" class="click" data-key="addPump"><path class="pipe" id="pDirect" d="M482 368H762V400"/>
+<circle class="eq" cx="515" cy="368" r="9"/><path d="M523 368l-12-7v14z" style="fill:var(--ea-ink2)"/>
+<rect class="eq" x="752" y="400" width="20" height="56" rx="4"/><path class="ln" d="M758 406V450M762 406V450M766 406V450"/>
+<path class="pipe" id="pDirectR" d="M762 456V474H782V525H770"/></g>
+<g id="gMixed"><g class="click" data-key="mainPump"><path class="pipe" id="pMixed" d="M482 427V446H600V485"/>
+<path class="pipe" id="pBypass" d="M464 525V418H470"/>
+<circle class="eq" cx="600" cy="468" r="8"/><path d="M600 476l-7-12h14z" style="fill:var(--ea-ink2)"/>
+<g class="valve"><path d="M473 409H491L482 418Z"/><path d="M473 427H491L482 418Z"/><path d="M470 409V427L482 418Z"/></g></g>
+<g class="click" data-key="mixed"><text class="tl" x="474" y="386" text-anchor="end" data-t="Mixed water"></text>
+<text class="tv" x="474" y="404" text-anchor="end"><tspan id="sMixed"></tspan><tspan class="ts" dx="6" id="sLwSpMix"></tspan></text></g></g></g></g>
 <g class="valve"><path id="vL" d="M470 81V99L482 90Z"/><path id="vR" class="shut" d="M494 81V99L482 90Z"/><path id="vB" d="M473 102H491L482 90Z"/></g>
 <text class="tl" x="494" y="128" data-t="3-way valve"></text><text class="ts" x="494" y="145" id="sV3"></text>
 <circle class="eq" cx="440" cy="525" r="16"/><path d="M425 525l21-12v24z" style="fill:var(--ea-ink2)"/>
@@ -190,8 +208,14 @@ class EspalthermaCard extends HTMLElement {
     for (const [, k] of TAGS) { const v = n(k); tx("g_" + k, k === "flow" ? (v == null ? "—" : f1(Math.max(0, v)) + " l/min") : deg(v)); }
     const lw = n("lw2") != null ? n("lw2") : n("lw1"), ret = n("inlet"), tank = n("tank");
     const mid = (a, b) => (a != null && b != null ? (a + b) / 2 : a);
-    [["pSup", lw], ["pDhw", lw], ["pCoil", mid(lw, tank)], ["pDhwR", ret], ["pSpace", lw], ["pLoop", mid(lw, ret)], ["pRet", ret]]
+    // Two zones (a direct one and a mixed one with its valve, pump and R7T) once the mixed water temperature reads
+    // something: single-zone units answer 0 there
+    const mixed = n("mixed"), two = mixed != null && mixed !== 0;
+    q("svg").classList.toggle("bizone", two);
+    [["pSup", lw], ["pDhw", lw], ["pCoil", mid(lw, tank)], ["pDhwR", ret], ["pSpace", lw], ["pLoop", mid(two ? mixed : lw, ret)], ["pRet", ret],
+     ["pTrunk", lw], ["pDirect", lw], ["pDirectR", ret], ["pMixed", mixed], ["pBypass", ret]]
       .forEach(([id, v]) => { q("#" + id).style.stroke = tcol(v, dark); });
+    q("#gDirect").classList.toggle("zoff", on("addPump") === false); q("#gMixed").classList.toggle("zoff", on("mainPump") === false);
     q("#tankFill").style.fill = tcol(tank, dark);
     const v3 = on("v3"), flow = n("flow"), pump = on("pump") || (flow || 0) > 0.5, inv = n("inv");
     const svg = q("svg");
@@ -214,7 +238,10 @@ class EspalthermaCard extends HTMLElement {
     const target_ = v => tr(hass, "target {n}°", {n: Math.round(v * 10) / 10});
     tx("sRtSp", target != null ? target_(target) : clim && clim.state === "off" ? (hass.formatEntityState ? hass.formatEntityState(clim) : "off") : "");
     tx("sDhwSp", n("dhwSp") != null ? target_(n("dhwSp")) : "");
-    tx("sLwSp", n("lwSp") != null ? target_(n("lwSp")) : "");
+    // The leaving water target: with two zones, the direct one's (the mixed zone has its own, shown at the valve)
+    const lwSpK = two && n("lwSpAdd") != null ? "lwSpAdd" : "lwSp";
+    tx("sLwSp", n(lwSpK) != null ? target_(n(lwSpK)) : "");
+    tx("sMixed", deg(mixed)); tx("sLwSpMix", n("lwSp") != null ? target_(n("lwSp")) : "");
   }
 
   getCardSize() { return 7; }
@@ -231,11 +258,11 @@ class EspalthermaStrategy {
     // Short names: the entities' own start with the device name, which hides what they are
     const name = {out: tr(hass, "Outside"), tank: tr(hass, "Hot water"), inv: tr(hass, "Compressor"), flow: tr(hass, "Flow"),
       bar: tr(hass, "Water pressure"), mode: tr(hass, "Mode"), err: tr(hass, "Error"), lw2: tr(hass, "Leaving"),
-      lw1: tr(hass, "Heat pump out"), inlet: tr(hass, "Return"), amp: tr(hass, "Current")};
+      lw1: tr(hass, "Heat pump out"), inlet: tr(hass, "Return"), amp: tr(hass, "Current"), mixed: tr(hass, "Mixed water")};
     const tiles = ["out", "tank", "inv", "flow", "bar", "mode", "err"].filter(has)
       .map(k => ({type: "tile", entity: ent[k], name: name[k], grid_options: {columns: 6}}));
     const line = k => ({entity: ent[k], name: name[k]});
-    const water = ["lw2", "lw1", "inlet", "tank", "out"].filter(has).map(line);
+    const water = ["lw2", "lw1", "mixed", "inlet", "tank", "out"].filter(has).map(line);
     const sections = [
       {type: "grid", column_span: 3, cards: [{type: "custom:espaltherma-card", climate, grid_options: {columns: "full"}}]},
       {type: "grid", cards: [
