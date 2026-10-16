@@ -2,7 +2,7 @@
 // ESPAltherma web page, fed by the entities ESPAltherma publishes through MQTT discovery.
 //   card:      type: custom:espaltherma-card   (options: climate, entities: {key: entity_id})
 //   dashboard: strategy: {type: custom:espaltherma}   (options: climate)
-const VERSION = "1.0.5";
+const VERSION = "1.0.6";
 
 // Entities, by the ids ESPAltherma's discovery gives them (built from the English labels, the same everywhere);
 // the Rotex definition names the leaving water and the 3-way valve its own way
@@ -22,6 +22,8 @@ const FIND = {
   addPump: /^binary_sensor\.espaltherma_add_pump$/, lwSpAdd: /^sensor\.espaltherma_lw_setpoint_add/,
   // the hot water and leaving water targets, when the unit allows setting them (experimental options of ESPAltherma)
   dhwSet: /^number\.[a-z0-9_]*hot_water_target$/, lwtSet: /^number\.[a-z0-9_]*leaving_water_target$/,
+  // the Altherma 4 has its refrigerant liquid side in the outdoor unit: the liquid pipe, when there is no R3T
+  r6t: /^sensor\.espaltherma_liquid_pipe_tempr6t/,
 };
 
 const I18N = /*I18N*/{};
@@ -56,6 +58,7 @@ function findEntities(hass, config) {
   const ids = Object.keys(hass.states);
   const e = {};
   for (const [k, re] of Object.entries(FIND)) e[k] = ids.find(id => re.test(id));
+  if (!e.r3t && e.r6t) e.r3t = e.r6t;
   Object.assign(e, (config && config.entities) || {});
   return e;
 }
