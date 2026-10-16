@@ -2,17 +2,18 @@
 // ESPAltherma web page, fed by the entities ESPAltherma publishes through MQTT discovery.
 //   card:      type: custom:espaltherma-card   (options: climate, entities: {key: entity_id})
 //   dashboard: strategy: {type: custom:espaltherma}   (options: climate)
-const VERSION = "1.0.4";
+const VERSION = "1.0.5";
 
-// Entities, by the ids ESPAltherma's discovery gives them (built from the English labels, the same everywhere)
+// Entities, by the ids ESPAltherma's discovery gives them (built from the English labels, the same everywhere);
+// the Rotex definition names the leaving water and the 3-way valve its own way
 const FIND = {
-  out: /^sensor\.espaltherma_.*outdoor_air_temp/, lw1: /^sensor\.espaltherma_leaving_water_temp_before_buh/,
+  out: /^sensor\.espaltherma_.*outdoor_air_temp/, lw1: /^sensor\.espaltherma_(leaving_water_temp_before_buh|outlet_water_temp)/,
   lw2: /^sensor\.espaltherma_leaving_water_temp_after_buh/, r3t: /^sensor\.espaltherma_refrig_temp_liquid_side/,
   inlet: /^sensor\.espaltherma_inlet_water_temp/, tank: /^sensor\.espaltherma_dhw_tank_temp/,
   room: /^sensor\.espaltherma_indoor_ambient_temp/, dhwSp: /^sensor\.espaltherma_dhw_setpoint$/,
   lwSp: /^sensor\.espaltherma_lw_setpoint_main/, rtSp: /^sensor\.espaltherma_rt_setpoint$/,
   inv: /^sensor\.espaltherma_inv_frequency/, amp: /^sensor\.espaltherma_inv_primary_current/,
-  v3: /^binary_sensor\.espaltherma_3way_valve/, pump: /^binary_sensor\.espaltherma_water_pump_operation/,
+  v3: /^binary_sensor\.espaltherma_(3way_valve|priority_to_domestic_water)/, pump: /^binary_sensor\.espaltherma_water_pump_operation/,
   flow: /^sensor\.espaltherma_flow_sensor/, bar: /^sensor\.espaltherma_water_pressure$/,
   mode: /^sensor\.espaltherma_operation_mode$/, err: /^sensor\.espaltherma_error_type$/,
   defrost: /^binary_sensor\.espaltherma_defrost_operation$/,
