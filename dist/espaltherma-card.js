@@ -2,7 +2,7 @@
 // ESPAltherma web page, fed by the entities ESPAltherma publishes through MQTT discovery.
 //   card:      type: custom:espaltherma-card   (options: climate, entities: {key: entity_id})
 //   dashboard: strategy: {type: custom:espaltherma}   (options: climate)
-const VERSION = "1.0.6";
+const VERSION = "1.0.7";
 
 // Entities, by the ids ESPAltherma's discovery gives them (built from the English labels, the same everywhere);
 // the Rotex definition names the leaving water and the 3-way valve its own way
@@ -95,6 +95,8 @@ svg{display:block;width:100%;height:auto;min-width:480px}
 #gZones,.bz{display:none}svg.bizone #gZones,svg.bizone .bz{display:block}
 svg.bizone #pSpace,svg.bizone #pSpace+.fl,svg.bizone #bSpace{display:none}
 #gZones .zoff{opacity:.3}#gZones .zoff .fl{animation:none;opacity:0}
+/* no hot water tank or no room thermostat (none of their entities): left out, the supply joins the house */
+svg.nodhw .dhw,svg.noroom .room,#pJoin,#pJoin+.fl{display:none}svg.nodhw #pJoin,svg.nodhw #pJoin+.fl{display:block}
 .eq{fill:var(--ea-card);stroke:var(--ea-ink2);stroke-width:1.6}
 .ln{fill:none;stroke:var(--ea-ink2);stroke-width:1.5}
 .area{fill:var(--ea-soft);stroke:none}
@@ -139,15 +141,15 @@ const SVG = `<svg viewBox="0 0 800 560" role="img">
 <rect class="eq" x="318" y="108" width="24" height="54" rx="8"/>
 <path class="ln" d="M330 114v4l-6 4 12 6-12 6 12 6-12 6 6 4v6" style="stroke:var(--ea-hot)"/>
 <text class="tl" x="310" y="140" text-anchor="end" data-t="Backup heater"></text>
-<g class="click" data-key="tank"><rect class="eq" x="590" y="28" width="150" height="236" rx="34"/>
+<g class="click dhw" data-key="tank"><rect class="eq" x="590" y="28" width="150" height="236" rx="34"/>
 <rect id="tankFill" x="594" y="32" width="142" height="228" rx="31" style="opacity:.2"/></g>
 <path class="eq" d="M580 360L685 292L790 360V540H580Z" style="stroke-linejoin:round"/>
-<g id="gDhw" class="br"><path class="pipe" id="pDhw" d="M494 90H598"/>
+<g id="gDhw" class="br dhw"><path class="pipe" id="pDhw" d="M494 90H598"/>
 <path class="pipe" id="pCoil" style="stroke-width:4.5" d="M598 90l40 10-36 14 36 14-36 14 36 14-36 14 36 14-36 14 36 14-36 14-12 4"/>
 <path class="pipe" id="pDhwR" d="M590 232H555V525"/></g>
-<path id="bSpace" d="M547 400H563" style="stroke:var(--ea-card);stroke-width:14"/>
-<path class="bz" d="M547 368H563M547 446H563" style="stroke:var(--ea-card);stroke-width:14"/>
-<g id="gSp" class="br act"><path class="pipe" id="pSpace" d="M482 102V400H600V485"/><path class="pipe" id="pLoop" style="stroke-width:4.5" d="M600 485H770V498H612V511H770V525H580"/>
+<path id="bSpace" class="dhw" d="M547 400H563" style="stroke:var(--ea-card);stroke-width:14"/>
+<path class="bz dhw" d="M547 368H563M547 446H563" style="stroke:var(--ea-card);stroke-width:14"/>
+<g id="gSp" class="br act"><path class="pipe" id="pJoin" d="M470 90H482V102"/><path class="pipe" id="pSpace" d="M482 102V400H600V485"/><path class="pipe" id="pLoop" style="stroke-width:4.5" d="M600 485H770V498H612V511H770V525H580"/>
 <g id="gZones"><path class="pipe" id="pTrunk" d="M482 102V409"/>
 <g id="gDirect" class="click" data-key="addPump"><path class="pipe" id="pDirect" d="M482 368H762V400"/>
 <circle class="eq" cx="515" cy="368" r="9"/><path d="M523 368l-12-7v14z" style="fill:var(--ea-ink2)"/>
@@ -159,8 +161,8 @@ const SVG = `<svg viewBox="0 0 800 560" role="img">
 <g class="valve"><path d="M473 409H491L482 418Z"/><path d="M473 427H491L482 418Z"/><path d="M470 409V427L482 418Z"/></g></g>
 <g class="click" data-key="mixed"><text class="tl" x="474" y="386" text-anchor="end" data-t="Mixed water"></text>
 <text class="tv" x="474" y="404" text-anchor="end"><tspan id="sMixed"></tspan><tspan class="ts" dx="6" id="sLwSpMix"></tspan></text></g></g></g></g>
-<g class="valve"><path id="vL" d="M470 81V99L482 90Z"/><path id="vR" class="shut" d="M494 81V99L482 90Z"/><path id="vB" d="M473 102H491L482 90Z"/></g>
-<text class="tl" x="494" y="128" data-t="3-way valve"></text><text class="ts" x="494" y="145" id="sV3"></text>
+<g class="valve dhw"><path id="vL" d="M470 81V99L482 90Z"/><path id="vR" class="shut" d="M494 81V99L482 90Z"/><path id="vB" d="M473 102H491L482 90Z"/></g>
+<text class="tl dhw" x="494" y="128" data-t="3-way valve"></text><text class="ts dhw" x="494" y="145" id="sV3"></text>
 <circle class="eq" cx="440" cy="525" r="16"/><path d="M425 525l21-12v24z" style="fill:var(--ea-ink2)"/>
 <text class="tl" x="440" y="556" text-anchor="middle" id="sPump"></text>
 <g class="click" data-key="bar"><path class="ln" d="M500 506V525"/><circle class="eq" cx="500" cy="492" r="14"/><path id="needle" class="ln" style="stroke:var(--ea-hot);stroke-width:2.2" d="M500 492L491 499"/>
@@ -174,7 +176,7 @@ const SVG = `<svg viewBox="0 0 800 560" role="img">
 <circle class="eq" cx="456" cy="58" r="11"/><path class="ln" d="M450 58h12"/></g>
 <g class="btn" data-act="lwt+"><title data-t="Raise the leaving water target"></title>
 <circle class="eq" cx="544" cy="58" r="11"/><path class="ln" d="M538 58h12M544 52v12"/></g></g>
-<g class="click" data-key="tank"><text class="tl" x="665" y="104" text-anchor="middle" data-t="Hot water"></text>
+<g class="click dhw" data-key="tank"><text class="tl" x="665" y="104" text-anchor="middle" data-t="Hot water"></text>
 <text class="tb" x="665" y="148" text-anchor="middle" id="sTank"></text>
 <text class="ts" x="665" y="172" text-anchor="middle" id="sDhwSp"></text></g>
 <text class="ts eff" x="665" y="192" text-anchor="middle" id="sDhwEff"><title id="tDhwEff"></title><tspan id="vDhwEff"></tspan></text>
@@ -182,7 +184,7 @@ const SVG = `<svg viewBox="0 0 800 560" role="img">
 <circle class="eq" cx="609" cy="167" r="13"/><path class="ln" d="M602 167h14"/></g>
 <g class="btn" data-act="dhw+"><title data-t="Raise the hot water target"></title>
 <circle class="eq" cx="721" cy="167" r="13"/><path class="ln" d="M714 167h14M721 160v14"/></g></g>
-<g class="click" data-key="room"><text class="tl" x="685" y="390" text-anchor="middle" data-t="Living room"></text>
+<g class="click room" data-key="room"><text class="tl" x="685" y="390" text-anchor="middle" data-t="Living room"></text>
 <text class="tb" x="685" y="432" text-anchor="middle" id="sRoom"></text>
 <text class="ts" x="685" y="456" text-anchor="middle" id="sRtSp"></text></g>
 <rect x="24" y="488" width="136" height="7" rx="3.5" fill="url(#lg)"/>
@@ -286,7 +288,11 @@ class EspalthermaCard extends HTMLElement {
     // something: single-zone units answer 0 there
     const mixed = n("mixed"), two = mixed != null && mixed !== 0;
     q("svg").classList.toggle("bizone", two);
-    [["pSup", lw], ["pDhw", lw], ["pCoil", mid(lw, tank)], ["pDhwR", ret], ["pSpace", lw], ["pLoop", mid(two ? mixed : lw, ret)], ["pRet", ret],
+    // No hot water tank, no room thermostat: none of their entities (once the heat pump's are there)
+    const has = k => !!st(k), unit = ["lw1", "lw2", "inlet", "out"].some(has);
+    q("svg").classList.toggle("nodhw", unit && !["tank", "dhwSp", "v3", "dhwSet"].some(has));
+    q("svg").classList.toggle("noroom", unit && !clim && !["room", "rtSp"].some(has));
+    [["pSup", lw], ["pJoin", lw], ["pDhw", lw], ["pCoil", mid(lw, tank)], ["pDhwR", ret], ["pSpace", lw], ["pLoop", mid(two ? mixed : lw, ret)], ["pRet", ret],
      ["pTrunk", lw], ["pDirect", lw], ["pDirectR", ret], ["pMixed", mixed], ["pBypass", ret]]
       .forEach(([id, v]) => { q("#" + id).style.stroke = tcol(v, dark); });
     q("#gDirect").classList.toggle("zoff", on("addPump") === false); q("#gMixed").classList.toggle("zoff", on("mainPump") === false);
