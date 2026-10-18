@@ -2,7 +2,7 @@
 // ESPAltherma web page, fed by the entities ESPAltherma publishes through MQTT discovery.
 //   card:      type: custom:espaltherma-card   (options: climate, entities: {key: entity_id})
 //   dashboard: strategy: {type: custom:espaltherma}   (options: climate)
-const VERSION = "1.0.8";
+const VERSION = "1.0.9";
 
 // Entities, by the ids ESPAltherma's discovery gives them (built from the English labels, the same everywhere);
 // the Rotex definition names the leaving water and the 3-way valve its own way, the Hybrid, EBLQ 5-7kW and EWAQ ones
@@ -283,7 +283,9 @@ class EspalthermaCard extends HTMLElement {
     const tx = (id, s) => { q("#" + id).textContent = s; };
     const clim = this._climate && hass.states[this._climate];
     for (const [, k] of TAGS) { const v = n(k); tx("g_" + k, k === "flow" ? (v == null ? "—" : f1(Math.max(0, v)) + " l/min") : deg(v)); }
-    const lw = n("lw2") != null ? n("lw2") : n("lw1"), ret = n("inlet"), tank = n("tank");
+    // A tank below 0 °C is no tank sensor (an open input reads about -37): the unit has no hot water tank
+    const noTank = n("tank") != null && n("tank") < 0;
+    const lw = n("lw2") != null ? n("lw2") : n("lw1"), ret = n("inlet"), tank = noTank ? null : n("tank");
     const mid = (a, b) => (a != null && b != null ? (a + b) / 2 : a);
     // Two zones (a direct one and a mixed one with its valve, pump and R7T) once the mixed water temperature reads
     // something: single-zone units answer 0 there
@@ -291,7 +293,7 @@ class EspalthermaCard extends HTMLElement {
     q("svg").classList.toggle("bizone", two);
     // No hot water tank, no room thermostat: none of their entities (once the heat pump's are there)
     const has = k => !!st(k), unit = ["lw1", "lw2", "inlet", "out"].some(has);
-    q("svg").classList.toggle("nodhw", unit && !["tank", "dhwSp", "v3", "dhwSet"].some(has));
+    q("svg").classList.toggle("nodhw", unit && (!["tank", "dhwSp", "v3", "dhwSet"].some(has) || noTank && on("v3") !== true && !has("dhwSet")));
     q("svg").classList.toggle("noroom", unit && !clim && !["room", "rtSp"].some(has));
     [["pSup", lw], ["pJoin", lw], ["pDhw", lw], ["pCoil", mid(lw, tank)], ["pDhwR", ret], ["pSpace", lw], ["pLoop", mid(two ? mixed : lw, ret)], ["pRet", ret],
      ["pTrunk", lw], ["pDirect", lw], ["pDirectR", ret], ["pMixed", mixed], ["pBypass", ret]]
