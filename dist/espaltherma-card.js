@@ -2,7 +2,7 @@
 // ESPAltherma web page, fed by the entities ESPAltherma publishes through MQTT discovery.
 //   card:      type: custom:espaltherma-card   (options: climate, entities: {key: entity_id})
 //   dashboard: strategy: {type: custom:espaltherma}   (options: climate)
-const VERSION = "1.0.9";
+const VERSION = "1.0.10";
 
 // Entities, by the ids ESPAltherma's discovery gives them (built from the English labels, the same everywhere);
 // the Rotex definition names the leaving water and the 3-way valve its own way, the Hybrid, EBLQ 5-7kW and EWAQ ones
@@ -27,7 +27,7 @@ const FIND = {
   r6t: /^sensor\.espaltherma_liquid_pipe_tempr6t/,
 };
 
-const I18N = {"fr":{"3-way valve":"Vanne 3 voies","Aims for {n} °C":"Vise {n} °C","Backup heater":"Appoint électrique","Compressor":"Compresseur","Flow":"Débit","Heat exchanger":"Échangeur","Heat pump out":"Sortie PAC","Hot water":"Eau chaude","Hot water target":"Consigne d'eau chaude","Indoor unit":"Unité intérieure","Leaving":"Départ","Leaving water target":"Consigne de départ d'eau","Living room":"Séjour","Mixed water":"Eau mélangée","Outdoor unit":"Unité extérieure","Outside":"Extérieur","Pump off":"Pompe arrêtée","Pump on":"Pompe en marche","Refrigerant":"Réfrigérant","Resting":"Au repos","Return":"Retour","Water pressure":"Pression d'eau","Water temperature":"Température de l'eau","What the heat pump follows right now: the target, plus the shift and the room modulation set on the unit.":"Ce que la pompe à chaleur suit en ce moment : la consigne, plus le décalage et la modulation par l'ambiance réglés sur l'unité.","What the thermostat really aims for, after the limits of the unit.":"Ce que le thermostat vise réellement, après les limites de l'unité.","What the thermostat really aims for: at this outdoor temperature the heat pump reaches {n} °C on its own, the rest would need the booster heater.":"Ce que le thermostat vise réellement : à cette température extérieure, la pompe à chaleur atteint {n} °C par elle-même, le reste demanderait l'appoint électrique.","target {n}°":"consigne {n}°","to the hot water":"vers l'eau chaude","to the house":"vers la maison"},"de":{"3-way valve":"3-Wege-Ventil","Aims for {n} °C":"Zielt auf {n} °C","Backup heater":"Heizstab","Compressor":"Verdichter","Flow":"Durchfluss","Heat exchanger":"Wärmetauscher","Heat pump out":"WP-Austritt","Hot water":"Warmwasser","Hot water target":"Warmwasser-Sollwert","Indoor unit":"Innengerät","Leaving":"Vorlauf","Leaving water target":"Vorlauf-Sollwert","Living room":"Wohnzimmer","Mixed water":"Mischwasser","Outdoor unit":"Außengerät","Outside":"Außen","Pump off":"Pumpe aus","Pump on":"Pumpe an","Refrigerant":"Kältemittel","Resting":"In Ruhe","Return":"Rücklauf","Water pressure":"Wasserdruck","Water temperature":"Wassertemperatur","What the heat pump follows right now: the target, plus the shift and the room modulation set on the unit.":"Was die Wärmepumpe gerade verfolgt: der Sollwert plus die am Gerät eingestellte Verschiebung und Raummodulation.","What the thermostat really aims for, after the limits of the unit.":"Worauf der Thermostat tatsächlich zielt, nach den Grenzen des Geräts.","What the thermostat really aims for: at this outdoor temperature the heat pump reaches {n} °C on its own, the rest would need the booster heater.":"Worauf der Thermostat tatsächlich zielt: bei dieser Außentemperatur erreicht die Wärmepumpe allein {n} °C, der Rest bräuchte den Zusatzheizer.","target {n}°":"Soll {n}°","to the hot water":"zum Warmwasser","to the house":"zum Haus"},"it":{"3-way valve":"Valvola a 3 vie","Aims for {n} °C":"Punta a {n} °C","Backup heater":"Resistenza elettrica","Compressor":"Compressore","Flow":"Portata","Heat exchanger":"Scambiatore","Heat pump out":"Uscita PdC","Hot water":"Acqua calda","Hot water target":"Temperatura desiderata acqua calda","Indoor unit":"Unità interna","Leaving":"Mandata","Leaving water target":"Temperatura di mandata desiderata","Living room":"Soggiorno","Mixed water":"Acqua miscelata","Outdoor unit":"Unità esterna","Outside":"Esterno","Pump off":"Pompa spenta","Pump on":"Pompa accesa","Refrigerant":"Refrigerante","Resting":"A riposo","Return":"Ritorno","Water pressure":"Pressione dell'acqua","Water temperature":"Temperatura dell'acqua","What the heat pump follows right now: the target, plus the shift and the room modulation set on the unit.":"Ciò che la pompa di calore segue in questo momento: il valore desiderato, più lo scostamento e la modulazione ambiente impostati sull'unità.","What the thermostat really aims for, after the limits of the unit.":"Ciò a cui punta davvero il termostato, entro i limiti dell'unità.","What the thermostat really aims for: at this outdoor temperature the heat pump reaches {n} °C on its own, the rest would need the booster heater.":"Ciò a cui punta davvero il termostato: a questa temperatura esterna la pompa di calore raggiunge {n} °C da sola, per il resto servirebbe la resistenza ausiliaria.","target {n}°":"obiettivo {n}°","to the hot water":"verso l'acqua calda","to the house":"verso la casa"},"es":{"3-way valve":"Válvula de 3 vías","Aims for {n} °C":"Busca {n} °C","Backup heater":"Resistencia de apoyo","Compressor":"Compresor","Flow":"Caudal","Heat exchanger":"Intercambiador","Heat pump out":"Salida BdC","Hot water":"Agua caliente","Hot water target":"Consigna de agua caliente","Indoor unit":"Unidad interior","Leaving":"Impulsión","Leaving water target":"Consigna de impulsión","Living room":"Salón","Mixed water":"Agua mezclada","Outdoor unit":"Unidad exterior","Outside":"Exterior","Pump off":"Bomba parada","Pump on":"Bomba en marcha","Refrigerant":"Refrigerante","Resting":"En reposo","Return":"Retorno","Water pressure":"Presión del agua","Water temperature":"Temperatura del agua","What the heat pump follows right now: the target, plus the shift and the room modulation set on the unit.":"Lo que la bomba de calor sigue ahora mismo: la consigna, más el desplazamiento y la modulación por la temperatura ambiente ajustados en la unidad.","What the thermostat really aims for, after the limits of the unit.":"Lo que el termostato busca realmente, dentro de los límites de la unidad.","What the thermostat really aims for: at this outdoor temperature the heat pump reaches {n} °C on its own, the rest would need the booster heater.":"Lo que el termostato busca realmente: a esta temperatura exterior la bomba de calor alcanza {n} °C por sí sola, el resto necesitaría la resistencia de apoyo.","target {n}°":"consigna {n}°","to the hot water":"hacia el agua caliente","to the house":"hacia la casa"}};
+const I18N = {"fr":{"3-way valve":"Vanne 3 voies","Aims for {n} °C":"Vise {n} °C","Backup heater":"Appoint électrique","Compressor":"Compresseur","Direct zone":"Zone directe","Flow":"Débit","Heat exchanger":"Échangeur","Heat pump out":"Sortie PAC","Hot water":"Eau chaude","Hot water target":"Consigne d'eau chaude","Indoor unit":"Unité intérieure","Leaving":"Départ","Leaving water target":"Consigne de départ d'eau","Living room":"Séjour","Mixed water":"Eau mélangée","Mixed zone":"Zone mélangée","Outdoor unit":"Unité extérieure","Outside":"Extérieur","Pump off":"Pompe arrêtée","Pump on":"Pompe en marche","Refrigerant":"Réfrigérant","Resting":"Au repos","Return":"Retour","Water pressure":"Pression d'eau","Water temperature":"Température de l'eau","What the heat pump follows right now: the target, plus the shift and the room modulation set on the unit.":"Ce que la pompe à chaleur suit en ce moment : la consigne, plus le décalage et la modulation par l'ambiance réglés sur l'unité.","What the thermostat really aims for, after the limits of the unit.":"Ce que le thermostat vise réellement, après les limites de l'unité.","What the thermostat really aims for: at this outdoor temperature the heat pump reaches {n} °C on its own, the rest would need the booster heater.":"Ce que le thermostat vise réellement : à cette température extérieure, la pompe à chaleur atteint {n} °C par elle-même, le reste demanderait l'appoint électrique.","target {n}°":"consigne {n}°","to the hot water":"vers l'eau chaude","to the house":"vers la maison"},"de":{"3-way valve":"3-Wege-Ventil","Aims for {n} °C":"Zielt auf {n} °C","Backup heater":"Heizstab","Compressor":"Verdichter","Direct zone":"Direkte Zone","Flow":"Durchfluss","Heat exchanger":"Wärmetauscher","Heat pump out":"WP-Austritt","Hot water":"Warmwasser","Hot water target":"Warmwasser-Sollwert","Indoor unit":"Innengerät","Leaving":"Vorlauf","Leaving water target":"Vorlauf-Sollwert","Living room":"Wohnzimmer","Mixed water":"Mischwasser","Mixed zone":"Gemischte Zone","Outdoor unit":"Außengerät","Outside":"Außen","Pump off":"Pumpe aus","Pump on":"Pumpe an","Refrigerant":"Kältemittel","Resting":"In Ruhe","Return":"Rücklauf","Water pressure":"Wasserdruck","Water temperature":"Wassertemperatur","What the heat pump follows right now: the target, plus the shift and the room modulation set on the unit.":"Was die Wärmepumpe gerade verfolgt: der Sollwert plus die am Gerät eingestellte Verschiebung und Raummodulation.","What the thermostat really aims for, after the limits of the unit.":"Worauf der Thermostat tatsächlich zielt, nach den Grenzen des Geräts.","What the thermostat really aims for: at this outdoor temperature the heat pump reaches {n} °C on its own, the rest would need the booster heater.":"Worauf der Thermostat tatsächlich zielt: bei dieser Außentemperatur erreicht die Wärmepumpe allein {n} °C, der Rest bräuchte den Zusatzheizer.","target {n}°":"Soll {n}°","to the hot water":"zum Warmwasser","to the house":"zum Haus"},"it":{"3-way valve":"Valvola a 3 vie","Aims for {n} °C":"Punta a {n} °C","Backup heater":"Resistenza elettrica","Compressor":"Compressore","Direct zone":"Zona diretta","Flow":"Portata","Heat exchanger":"Scambiatore","Heat pump out":"Uscita PdC","Hot water":"Acqua calda","Hot water target":"Temperatura desiderata acqua calda","Indoor unit":"Unità interna","Leaving":"Mandata","Leaving water target":"Temperatura di mandata desiderata","Living room":"Soggiorno","Mixed water":"Acqua miscelata","Mixed zone":"Zona miscelata","Outdoor unit":"Unità esterna","Outside":"Esterno","Pump off":"Pompa spenta","Pump on":"Pompa accesa","Refrigerant":"Refrigerante","Resting":"A riposo","Return":"Ritorno","Water pressure":"Pressione dell'acqua","Water temperature":"Temperatura dell'acqua","What the heat pump follows right now: the target, plus the shift and the room modulation set on the unit.":"Ciò che la pompa di calore segue in questo momento: il valore desiderato, più lo scostamento e la modulazione ambiente impostati sull'unità.","What the thermostat really aims for, after the limits of the unit.":"Ciò a cui punta davvero il termostato, entro i limiti dell'unità.","What the thermostat really aims for: at this outdoor temperature the heat pump reaches {n} °C on its own, the rest would need the booster heater.":"Ciò a cui punta davvero il termostato: a questa temperatura esterna la pompa di calore raggiunge {n} °C da sola, per il resto servirebbe la resistenza ausiliaria.","target {n}°":"obiettivo {n}°","to the hot water":"verso l'acqua calda","to the house":"verso la casa"},"es":{"3-way valve":"Válvula de 3 vías","Aims for {n} °C":"Busca {n} °C","Backup heater":"Resistencia de apoyo","Compressor":"Compresor","Direct zone":"Zona directa","Flow":"Caudal","Heat exchanger":"Intercambiador","Heat pump out":"Salida BdC","Hot water":"Agua caliente","Hot water target":"Consigna de agua caliente","Indoor unit":"Unidad interior","Leaving":"Impulsión","Leaving water target":"Consigna de impulsión","Living room":"Salón","Mixed water":"Agua mezclada","Mixed zone":"Zona mezclada","Outdoor unit":"Unidad exterior","Outside":"Exterior","Pump off":"Bomba parada","Pump on":"Bomba en marcha","Refrigerant":"Refrigerante","Resting":"En reposo","Return":"Retorno","Water pressure":"Presión del agua","Water temperature":"Temperatura del agua","What the heat pump follows right now: the target, plus the shift and the room modulation set on the unit.":"Lo que la bomba de calor sigue ahora mismo: la consigna, más el desplazamiento y la modulación por la temperatura ambiente ajustados en la unidad.","What the thermostat really aims for, after the limits of the unit.":"Lo que el termostato busca realmente, dentro de los límites de la unidad.","What the thermostat really aims for: at this outdoor temperature the heat pump reaches {n} °C on its own, the rest would need the booster heater.":"Lo que el termostato busca realmente: a esta temperatura exterior la bomba de calor alcanza {n} °C por sí sola, el resto necesitaría la resistencia de apoyo.","target {n}°":"consigna {n}°","to the hot water":"hacia el agua caliente","to the house":"hacia la casa"}};
 // Texts of the dashboard that the web page does not have
 const OWN = {
   fr: {"Mode": "Mode", "Error": "Erreur", "Current": "Courant",
@@ -94,7 +94,7 @@ svg{display:block;width:100%;height:auto;min-width:480px}
 @keyframes fl{to{stroke-dashoffset:-18}}
 .br{transition:opacity .6s}.br:not(.act){opacity:.28}
 #gZones,.bz{display:none}svg.bizone #gZones,svg.bizone .bz{display:block}
-svg.bizone #pSpace,svg.bizone #pSpace+.fl,svg.bizone #bSpace{display:none}
+svg.bizone #pSpace,svg.bizone #pSpace+.fl,svg.bizone #bSpace,svg.bizone #pLoop,svg.bizone #pLoop+.fl,svg.bizone .sz{display:none}svg.bizone #gGauge{transform:translate(-48px,-435px)}
 #gZones .zoff{opacity:.3}#gZones .zoff .fl{animation:none;opacity:0}
 /* no hot water tank or no room thermostat (none of their entities): left out, the supply joins the house */
 svg.nodhw .dhw,svg.noroom .room,#pJoin,#pJoin+.fl{display:none}svg.nodhw #pJoin,svg.nodhw #pJoin+.fl{display:block}
@@ -138,40 +138,44 @@ const SVG = `<svg viewBox="0 0 800 560" role="img">
 <rect class="eq" x="230" y="200" width="40" height="160" rx="8"/>
 <path class="ln" d="M234 212l32 12-32 12 32 12-32 12 32 12-32 12 32 12-32 12 32 12-32 12 32 12"/>
 <text class="tl" x="250" y="192" text-anchor="middle" data-t="Heat exchanger"></text>
-<g id="gMain" class="br act"><path class="pipe" id="pSup" d="M270 220H330V90H470"/><path class="pipe" id="pRet" d="M580 525H300V340H270"/></g>
+<g id="gMain" class="br act"><path class="pipe" id="pSup" d="M270 220H330V90H470"/><path class="pipe" id="pRet" d="M572 525H300V340H270"/></g>
 <rect class="eq" x="318" y="108" width="24" height="54" rx="8"/>
 <path class="ln" d="M330 114v4l-6 4 12 6-12 6 12 6-12 6 6 4v6" style="stroke:var(--ea-hot)"/>
 <text class="tl" x="310" y="140" text-anchor="end" data-t="Backup heater"></text>
 <g class="click dhw" data-key="tank"><rect class="eq" x="590" y="28" width="150" height="236" rx="34"/>
 <rect id="tankFill" x="594" y="32" width="142" height="228" rx="31" style="opacity:.2"/></g>
 <path class="eq" d="M580 360L685 292L790 360V540H580Z" style="stroke-linejoin:round"/>
+<path class="ln bz" d="M580 452H790"/>
 <g id="gDhw" class="br dhw"><path class="pipe" id="pDhw" d="M494 90H598"/>
 <path class="pipe" id="pCoil" style="stroke-width:4.5" d="M598 90l40 10-36 14 36 14-36 14 36 14-36 14 36 14-36 14 36 14-36 14-12 4"/>
 <path class="pipe" id="pDhwR" d="M590 232H555V525"/></g>
 <path id="bSpace" class="dhw" d="M547 400H563" style="stroke:var(--ea-card);stroke-width:14"/>
-<path class="bz dhw" d="M547 368H563M547 446H563" style="stroke:var(--ea-card);stroke-width:14"/>
-<g id="gSp" class="br act"><path class="pipe" id="pJoin" d="M470 90H482V102"/><path class="pipe" id="pSpace" d="M482 102V400H600V485"/><path class="pipe" id="pLoop" style="stroke-width:4.5" d="M600 485H770V498H612V511H770V525H580"/>
-<g id="gZones"><path class="pipe" id="pTrunk" d="M482 102V409"/>
-<g id="gDirect" class="click" data-key="addPump"><path class="pipe" id="pDirect" d="M482 368H762V400"/>
-<circle class="eq" cx="515" cy="368" r="9"/><path d="M523 368l-12-7v14z" style="fill:var(--ea-ink2)"/>
-<rect class="eq" x="752" y="400" width="20" height="56" rx="4"/><path class="ln" d="M758 406V450M762 406V450M766 406V450"/>
-<path class="pipe" id="pDirectR" d="M762 456V474H782V525H770"/></g>
-<g id="gMixed"><g class="click" data-key="mainPump"><path class="pipe" id="pMixed" d="M482 427V446H600V485"/>
-<path class="pipe" id="pBypass" d="M464 525V418H470"/>
-<circle class="eq" cx="600" cy="468" r="8"/><path d="M600 476l-7-12h14z" style="fill:var(--ea-ink2)"/>
-<g class="valve"><path d="M473 409H491L482 418Z"/><path d="M473 427H491L482 418Z"/><path d="M470 409V427L482 418Z"/></g></g>
+<path class="bz dhw" d="M547 380H563M547 424H563M547 470H563" style="stroke:var(--ea-card);stroke-width:14"/>
+<g id="gSp" class="br act"><path class="pipe" id="pJoin" d="M470 90H482V102"/><path class="pipe" id="pSpace" d="M482 102V400H600V485"/><path class="pipe" id="pLoop" style="stroke-width:4.5" d="M600 485H770V498H612V511H770V525H572"/>
+<g id="gZones"><path class="pipe" id="pTrunk" d="M482 102V415"/>
+<g id="gDirect" class="click" data-key="addPump"><path class="pipe" id="pDirect" d="M482 380H598"/>
+<rect class="eq" x="598" y="372" width="50" height="40" rx="4"/><path class="ln" d="M607 378V406M615 378V406M623 378V406M631 378V406M639 378V406"/>
+<path class="pipe" id="pDirectR" d="M598 402H572V525"/></g>
+<path d="M565 424H579M565 470H579" style="stroke:var(--ea-card);stroke-width:14"/>
+<g id="gMixed"><g class="click" data-key="mainPump"><path class="pipe" id="pMixed" d="M494 424H600V476"/>
+<path class="pipe" id="pLoopM" style="stroke-width:4.5" d="M600 476H686V490H612V504H686V518H600"/>
+<path class="pipe" id="pMixedR" d="M600 518H588V470H464V525"/>
+<path class="pipe" id="pBypass" d="M482 470V433"/>
+<circle class="sens" cx="528" cy="424" r="4.5"/>
+<circle class="eq" cx="525" cy="470" r="9"/><path d="M516 470l13-7.5v15z" style="fill:var(--ea-ink2)"/>
+<g class="valve"><path d="M473 415H491L482 424Z"/><path d="M473 433H491L482 424Z"/><path d="M494 415V433L482 424Z"/></g></g>
 <g class="click" data-key="mixed"><text class="tl" x="474" y="386" text-anchor="end" data-t="Mixed water"></text>
 <text class="tv" x="474" y="404" text-anchor="end"><tspan id="sMixed"></tspan><tspan class="ts" dx="6" id="sLwSpMix"></tspan></text></g></g></g></g>
 <g class="valve dhw"><path id="vL" d="M470 81V99L482 90Z"/><path id="vR" class="shut" d="M494 81V99L482 90Z"/><path id="vB" d="M473 102H491L482 90Z"/></g>
 <text class="tl dhw" x="494" y="128" data-t="3-way valve"></text><text class="ts dhw" x="494" y="145" id="sV3"></text>
 <circle class="eq" cx="440" cy="525" r="16"/><path d="M425 525l21-12v24z" style="fill:var(--ea-ink2)"/>
 <text class="tl" x="440" y="556" text-anchor="middle" id="sPump"></text>
-<g class="click" data-key="bar"><path class="ln" d="M500 506V525"/><circle class="eq" cx="500" cy="492" r="14"/><path id="needle" class="ln" style="stroke:var(--ea-hot);stroke-width:2.2" d="M500 492L491 499"/>
+<g class="click" id="gGauge" data-key="bar"><path class="ln" d="M500 506V525"/><circle class="eq" cx="500" cy="492" r="14"/><path id="needle" class="ln" style="stroke:var(--ea-hot);stroke-width:2.2" d="M500 492L491 499"/>
 <text class="tv" x="500" y="468" text-anchor="middle" id="sBar"></text></g>
 <rect x="346" y="519" width="14" height="12" rx="3" style="fill:var(--ea-ink2)"/>
 <circle class="sens" cx="330" cy="190" r="4.5"/><circle class="sens" cx="390" cy="90" r="4.5"/><circle class="sens" cx="300" cy="440" r="4.5"/>
 <g id="tags"></g>
-<text class="ts" x="500" y="62" text-anchor="middle" id="sLwSp"></text>
+<text class="ts sz" x="500" y="62" text-anchor="middle" id="sLwSp"></text>
 <text class="ts eff" x="500" y="82" text-anchor="middle" id="sLwtEff"><title id="tLwtEff"></title><tspan id="vLwtEff"></tspan></text>
 <g id="gLwtSet"><g class="btn" data-act="lwt-"><title data-t="Lower the leaving water target"></title>
 <circle class="eq" cx="456" cy="58" r="11"/><path class="ln" d="M450 58h12"/></g>
@@ -185,9 +189,14 @@ const SVG = `<svg viewBox="0 0 800 560" role="img">
 <circle class="eq" cx="609" cy="167" r="13"/><path class="ln" d="M602 167h14"/></g>
 <g class="btn" data-act="dhw+"><title data-t="Raise the hot water target"></title>
 <circle class="eq" cx="721" cy="167" r="13"/><path class="ln" d="M714 167h14M721 160v14"/></g></g>
-<g class="click room" data-key="room"><text class="tl" x="685" y="390" text-anchor="middle" data-t="Living room"></text>
+<g class="click room sz" data-key="room"><text class="tl" x="685" y="390" text-anchor="middle" data-t="Living room"></text>
 <text class="tb" x="685" y="432" text-anchor="middle" id="sRoom"></text>
 <text class="ts" x="685" y="456" text-anchor="middle" id="sRtSp"></text></g>
+<text class="tl bz" x="718" y="392" text-anchor="middle" data-t="Direct zone"></text>
+<text class="ts bz" x="718" y="414" text-anchor="middle" id="sZoneDir"></text>
+<text class="tl bz" x="738" y="474" text-anchor="middle" data-t="Mixed zone"></text>
+<g class="click room bz" data-key="room"><text class="tb" x="738" y="507" text-anchor="middle" id="sRoomB" style="font-size:30px"></text>
+<text class="ts" x="738" y="528" text-anchor="middle" id="sRtSpB"></text></g>
 <rect x="24" y="488" width="136" height="7" rx="3.5" fill="url(#lg)"/>
 <text class="ts" x="24" y="512">15°</text><text class="ts" x="92" y="512" text-anchor="middle">35°</text><text class="ts" x="160" y="512" text-anchor="end">55°</text>
 <text class="tl" x="24" y="478" data-t="Water temperature"></text>
@@ -296,7 +305,7 @@ class EspalthermaCard extends HTMLElement {
     q("svg").classList.toggle("nodhw", unit && (!["tank", "dhwSp", "v3", "dhwSet"].some(has) || noTank && on("v3") !== true && !has("dhwSet")));
     q("svg").classList.toggle("noroom", unit && !clim && !["room", "rtSp"].some(has));
     [["pSup", lw], ["pJoin", lw], ["pDhw", lw], ["pCoil", mid(lw, tank)], ["pDhwR", ret], ["pSpace", lw], ["pLoop", mid(two ? mixed : lw, ret)], ["pRet", ret],
-     ["pTrunk", lw], ["pDirect", lw], ["pDirectR", ret], ["pMixed", mixed], ["pBypass", ret]]
+     ["pTrunk", lw], ["pDirect", lw], ["pDirectR", ret], ["pMixed", mixed], ["pLoopM", mid(mixed, ret)], ["pMixedR", ret], ["pBypass", ret]]
       .forEach(([id, v]) => { q("#" + id).style.stroke = tcol(v, dark); });
     q("#gDirect").classList.toggle("zoff", on("addPump") === false); q("#gMixed").classList.toggle("zoff", on("mainPump") === false);
     q("#tankFill").style.fill = tcol(tank, dark);
@@ -317,9 +326,12 @@ class EspalthermaCard extends HTMLElement {
     tx("sTank", deg(tank));
     const room = clim && clim.attributes.current_temperature != null ? parseFloat(clim.attributes.current_temperature) : n("room");
     const target = clim && clim.state !== "off" && clim.attributes.temperature != null ? parseFloat(clim.attributes.temperature) : n("rtSp");
-    tx("sRoom", deg(room));
+    tx("sRoom", deg(room)); tx("sRoomB", deg(room));
     const target_ = v => tr(hass, "target {n}°", {n: Math.round(v * 10) / 10});
-    tx("sRtSp", target != null ? target_(target) : clim && clim.state === "off" ? (hass.formatEntityState ? hass.formatEntityState(clim) : "off") : "");
+    const roomTarget = target != null ? target_(target) : clim && clim.state === "off" ? (hass.formatEntityState ? hass.formatEntityState(clim) : "off") : "";
+    tx("sRtSp", roomTarget); tx("sRtSpB", roomTarget);
+    // two zones: the direct one upstairs with its water target, the mixed one downstairs with the room
+    tx("sZoneDir", n("lwSpAdd") != null ? target_(n("lwSpAdd")) : "");
     // Hot water target: the entity that sets it when there is one, otherwise the reading. The buttons appear
     // only when the heat pump accepts a target (ESPAltherma's experimental option).
     const set = st("dhwSet"), dhwShown = this._shown("dhwSet", set);
