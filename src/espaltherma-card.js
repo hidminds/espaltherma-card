@@ -2,7 +2,7 @@
 // ESPAltherma web page, fed by the entities ESPAltherma publishes through MQTT discovery.
 //   card:      type: custom:espaltherma-card   (options: climate, entities: {key: entity_id})
 //   dashboard: strategy: {type: custom:espaltherma}   (options: climate)
-const VERSION = "1.0.10";
+const VERSION = "1.0.11";
 
 // Entities, by the ids ESPAltherma's discovery gives them (built from the English labels, the same everywhere);
 // the Rotex definition names the leaving water and the 3-way valve its own way, the Hybrid, EBLQ 5-7kW and EWAQ ones
@@ -66,7 +66,9 @@ function findEntities(hass, config) {
 
 function defaultClimate(hass) {
   if (hass.states["climate.altherma"]) return "climate.altherma";
-  return Object.keys(hass.states).find(id => id.startsWith("climate.") && /altherma|heat_?pump|daikin/i.test(id));
+  // Daikin's own integration also exposes "leaving water offset" climates: not room thermostats
+  const ids = Object.keys(hass.states).filter(id => id.startsWith("climate.") && /altherma|heat_?pump|daikin/i.test(id) && !/offset|leaving_?water/i.test(id));
+  return ids.find(id => /room/i.test(id)) || ids[0];
 }
 
 // Water colour: blue (15°) to red (55°), the scale of the ESPAltherma web page
@@ -87,7 +89,7 @@ const STYLE = `
 :host([dark]){--ea-hot:#f2645a;--ea-cold:#4f9cf0;--ea-refr:#979dac}
 ha-card{padding:8px;overflow:hidden}
 .wrap{overflow-x:auto}
-svg{display:block;width:100%;height:auto;min-width:480px}
+svg{display:block;width:100%;height:auto;min-width:min(480px,100vw - 32px)} /* fits a phone's width instead of being cut */
 .pipe{fill:none;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;transition:stroke .8s}
 .fl{fill:none;stroke:var(--ea-card);stroke-width:2.4;stroke-dasharray:2 16;stroke-linecap:round;opacity:0}
 .flowing .act .fl{opacity:.95;animation:fl .9s linear infinite}
