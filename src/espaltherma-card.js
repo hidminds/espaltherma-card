@@ -329,7 +329,7 @@ class EspalthermaCard extends HTMLElement {
     const room = clim && clim.attributes.current_temperature != null ? parseFloat(clim.attributes.current_temperature) : n("room");
     const target = clim && clim.state !== "off" && clim.attributes.temperature != null ? parseFloat(clim.attributes.temperature) : n("rtSp");
     tx("sRoom", deg(room)); tx("sRoomB", deg(room));
-    const target_ = v => tr(hass, "target {n}°", {n: Math.round(v * 10) / 10});
+    const target_ = v => tr(hass, "Target {n}°", {n: Math.round(v * 10) / 10});
     const roomTarget = target != null ? target_(target) : clim && clim.state === "off" ? (hass.formatEntityState ? hass.formatEntityState(clim) : "off") : "";
     tx("sRtSp", roomTarget); tx("sRtSpB", roomTarget);
     // two zones: the direct one upstairs with its water target, the mixed one downstairs with the room
