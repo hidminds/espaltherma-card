@@ -355,7 +355,7 @@ class EspalthermaCard extends HTMLElement {
   }
 
   getCardSize() { return 7; }
-  getGridOptions() { return {columns: 12, min_columns: 6}; }
+  getGridOptions() { return {columns: "full", min_columns: 6}; }
   static getStubConfig() { return {}; }
 }
 
